@@ -9,7 +9,7 @@ public:
 
 	std::string value() {
 		if (err!=0){
-			return 'ER' + std::to_string(err);
+			return "ER" + std::to_string(err);
 		}
 
 		std::string s = std::to_string(_value);
@@ -21,7 +21,7 @@ public:
 		int b = bits-1;
 		int32_t msk = (1 << b)-1;
 		int32_t sign = (val >> b) ? 0 : -1;
-		return reinterpret_cast<int32_t>((sign << b) | (val & msk));
+		return (int32_t)((sign << b) | (val & msk));
 	}
 
 	int convert(uint32_t val) {

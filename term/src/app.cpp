@@ -13,7 +13,6 @@ void App::init(){
 	int i=0;
 	lcd.init(cfg.i2c);
 
-	objects[i++] = led.init(cfg.ledPin);
 	objects[i++] = pw1.init(cfg.spi, cfg.pw1);
 	objects[i++] = pw2.init(cfg.spi, cfg.pw2);
 	objects[i++] = t1.init(cfg.spi, cfg.csT1);

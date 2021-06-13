@@ -27,7 +27,7 @@ private:
 	Power pw2;
 	MAX31855 t1;
 	MAX31855 t2;
-	Object* objects[5];
+	Object* objects[4];
 	Timer tmr;
 
 
