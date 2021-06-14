@@ -9,6 +9,13 @@ class PWM: public GPIO{
 public:
 	PWM():power(0),pos(0),isOn(false) {}
 
+	PWM* init(const Pin& pin){
+		GPIO::init(pin);
+		setPower(.0);
+		set(false);
+		return this;
+	}
+
 	void setPower(float value) {
 		power = value;
 		width = PERIOD - (PERIOD * value);
