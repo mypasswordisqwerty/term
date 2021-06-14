@@ -11,7 +11,7 @@ public:
 		if (!cs.valid()){
 			return;
 		}
-		int power = value * 255;
+		uint16_t power = (uint16_t)(value * 0xFF);
 		write(&power, 2);
 	}
 

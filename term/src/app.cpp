@@ -37,19 +37,19 @@ void App::loop(){
 }
 
 std::string App::processCommand(std::string command){
-	lastcmd = command;
+	std::string save = command;
 	string cmd = Utils::shift(command);
 	if (cmd == "pw") {
-		Power& pw = pw1;
+		Power* pw = &pw1;
 		string p = Utils::shift(command);
 		if (p=="2"){
-			pw = pw2;
+			pw = &pw2;
 		}else if (p!="1"){
 			return "Bad power "+p;
 		}
 		p = Utils::shift(command);
 		int val = std::stoi(p);
-		pw.setPower(val/100.f);
+		pw->setPower(val/100.f);
 	} else if (cmd=="status") {
 		return status();
 	} else if (cmd=="off") {
@@ -58,6 +58,7 @@ std::string App::processCommand(std::string command){
 	} else {
 		return "Bad command " + cmd;
 	}
+	lastcmd = save;
 	return "ok";
 }
 

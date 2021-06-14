@@ -27,14 +27,6 @@ public:
 	}
 
 	int convert(int16_t val) {
-		int16_t rval = val;
-		val = 0;
-		for (int i=0; i<2; i++){
-			val <<= 8;
-			val |= rval & 0xFF;
-			rval >>= 8;
-		}
-
 		err = val & 1;
 		val >>= 2;
 		//float ref = esign(val & 0xFFF, 12) * 0.0625;
