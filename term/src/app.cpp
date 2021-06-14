@@ -37,6 +37,7 @@ void App::loop(){
 }
 
 std::string App::processCommand(std::string command){
+	lastcmd = command;
 	string cmd = Utils::shift(command);
 	if (cmd == "pw") {
 		Power& pw = pw1;

@@ -1,0 +1,7 @@
+.*
+!.gitignore
+!.project
+!.cproject
+!.mxproject
+Debug
+

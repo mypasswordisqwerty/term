@@ -11,20 +11,22 @@ SPIDev* SPIDev::init(SPI_HandleTypeDef* spi, const Pin& csPin) {
 	return this;
 }
 
-void SPIDev::read(void* buf, uint16_t size) {
+HAL_StatusTypeDef SPIDev::read(void* buf, uint16_t size) {
 	if (!cs.valid()){
-		return;
+		return HAL_ERROR;
 	}
 	cs.off();
-	HAL_SPI_Receive(spi, (uint8_t*)buf, size, 1000);
+	HAL_StatusTypeDef status = HAL_SPI_Receive(spi, (uint8_t*)buf, size, 500);
 	cs.on();
+	return status;
 }
 
-void SPIDev::write(void* buf, uint16_t size) {
+HAL_StatusTypeDef SPIDev::write(void* buf, uint16_t size) {
 	if (!cs.valid()){
-		return;
+		return HAL_ERROR;
 	}
 	cs.off();
-	HAL_SPI_Transmit(spi, (uint8_t*)buf, size, 1000);
+	HAL_StatusTypeDef status = HAL_SPI_Transmit(spi, (uint8_t*)buf, size, 1000);
 	cs.on();
+	return status;
 }

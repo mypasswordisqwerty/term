@@ -3,9 +3,11 @@
 
 #include <jlib/spidev.hpp>
 
+#define REQ_TIME 500
+
 class MAX31855: public SPIDev{
 public:
-	MAX31855():_value(0), err(0){}
+	MAX31855():_value(0), err(9), reqtime(0){}
 
 	std::string value() {
 		if (err!=0){
@@ -24,29 +26,43 @@ public:
 		return (int32_t)((sign << b) | (val & msk));
 	}
 
-	int convert(uint32_t val) {
-		err = val & 7;
-		val >>= 4;
-		float ref = esign(val & 0xFFF, 12) * 0.0625;
-		val >>= 14;
-		float t = esign(val, 14) * 0.25;
+	int convert(int16_t val) {
+		int16_t rval = val;
+		val = 0;
+		for (int i=0; i<2; i++){
+			val <<= 8;
+			val |= rval & 0xFF;
+			rval >>= 8;
+		}
+
+		err = val & 1;
+		val >>= 2;
+		//float ref = esign(val & 0xFFF, 12) * 0.0625;
+		//val >>= 14;
+		float t = val * 0.25;
 		return (int)t;
 	}
 
 
 
 	virtual void loop(uint32_t delay) override {
-		if (!cs.valid()){
+		reqtime -= delay;
+		if (!cs.valid() || reqtime > 0){
 			return;
 		}
-		uint32_t val = 0;
-		read(&val, 4);
+		reqtime = REQ_TIME;
+		int16_t val = 0;
+		if (read(&val, 2)!=HAL_OK){
+			err = 9;
+			return;
+		}
 		_value = convert(val);
 	}
 
 private:
 	int _value;
 	int err;
+	int reqtime;
 
 };
 
