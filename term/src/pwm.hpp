@@ -3,7 +3,7 @@
 
 #include <jlib/gpio.hpp>
 
-#define PERIOD 30000
+#define PWM_PERIOD 30000
 
 class PWM: public GPIO{
 public:
@@ -18,7 +18,7 @@ public:
 
 	void setPower(float value) {
 		power = value;
-		width = PERIOD - (PERIOD * value);
+		width = PWM_PERIOD - (PWM_PERIOD * value);
 	}
 
 	virtual void loop(uint32_t delay) {
@@ -27,7 +27,7 @@ public:
 		}
 		pos -= delay;
 		if (pos <= 0){
-			pos = PERIOD;
+			pos = PWM_PERIOD;
 		}
 		bool val = pos > width;
 		if (val != isOn){

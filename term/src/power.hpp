@@ -6,6 +6,8 @@
 #include "ad8400.hpp"
 #include "pwm.hpp"
 
+#define MAX_POWER 0.9f
+
 class Power: public Object {
 public:
 	Power():_power(0){};
@@ -25,7 +27,7 @@ public:
 	}
 
 	void setPower(float power) {
-		power = std::min(1.f, std::max(0.f, power));
+		power = std::min(MAX_POWER, std::max(0.f, power));
 		_power = power;
 		if (adOn.valid()){
 			adOn.set(power!=0);

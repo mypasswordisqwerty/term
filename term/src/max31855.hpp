@@ -35,7 +35,7 @@ public:
 		return (int)t;
 	}
 
-
+	inline int temperature() {return _value;}
 
 	virtual void loop(uint32_t delay) override {
 		reqtime -= delay;

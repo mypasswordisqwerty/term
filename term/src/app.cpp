@@ -7,19 +7,22 @@
 App app;
 
 const int App::LOOP_DELAY = 100;
+#define READY "READY"
+#define OK "ok"
 
 void App::init(){
-	lastcmd = "READY";
-	int i=0;
+	lastcmd = READY;
 	lcd.init(cfg.i2c);
+	jobLed.init(cfg.ledJob);
 
-	objects[i++] = pw1.init(cfg.spi, cfg.pw1);
-	objects[i++] = pw2.init(cfg.spi, cfg.pw2);
-	objects[i++] = t1.init(cfg.spi, cfg.csT1);
-	objects[i++] = t2.init(cfg.spi, cfg.csT2);
+	objects.push_back(pw1.init(cfg.spi, cfg.pw1));
+	objects.push_back(pw2.init(cfg.spi, cfg.pw2));
+	objects.push_back(t1.init(cfg.spi, cfg.csT1));
+	objects.push_back(t2.init(cfg.spi, cfg.csT2));
+	objects.push_back(top.init(pw1));
+	objects.push_back(bottom.init(pw2));
+	objects.push_back(jobButton.init(cfg.btnStart, this));
 }
-
-bool on = false;
 
 std::string App::status(){
 	return pw1.value() + " " + t1.value()+ " " + t2.value() + " " + pw2.value();
@@ -36,10 +39,81 @@ void App::loop(){
 	HAL_Delay(LOOP_DELAY);
 }
 
+void App::onButtonToggle(const Button& btn, bool state) {
+	stop();
+}
+
+void App::onPidDone(Pid& pid) {
+	pid.clearCallback();
+	runProgram();
+}
+
+void App::stop(){
+	program.clear();
+	inProgram = false;
+	top.clearTarget();
+	bottom.clearTarget();
+	pw1.setPower(0);
+	pw2.setPower(0);
+	jobLed.off();
+	lastcmd = READY;
+}
+
+void App::runProgram() {
+	if (program.empty()) {
+		jobLed.off();
+		inProgram = false;
+		return;
+	}
+	string cmd = program[0];
+	program.erase(program.begin());
+	cmd = processCommand(cmd);
+	if (cmd!=OK){
+		lastcmd = cmd;
+	}
+}
+
+void App::startProgram() {
+	if (inProgram) {
+		return;
+	}
+	inProgram = true;
+	jobLed.on();
+}
+
 std::string App::processCommand(std::string command){
 	std::string save = command;
 	string cmd = Utils::shift(command);
-	if (cmd == "pw") {
+	if (cmd=="kill") {
+		stop();
+	} else if (cmd=="status") {
+		return status();
+	}
+	if (inProgram) {
+		program.push_back(save);
+		return OK;
+	}
+	if (cmd == "heat") {
+		startProgram();
+		string p = Utils::shift(command);
+		Pid* pid = &bottom;
+		MAX31855* src = &t1;
+		if (p=="top") {
+			pid = &top;
+		}
+		p = Utils::shift(command);
+		int val = 0;
+		if (p[0]=='t') {
+			val = p[1]=='2' ? t2.temperature() : t1.temperature();
+		}else{
+			val = std::stoi(p);
+		}
+		p = Utils::shift(command);
+		if (p[1]=='2') {
+			src = &t2;
+		}
+		pid->setTarget(src, val, this);
+	} else if (cmd == "pw") {
 		Power* pw = &pw1;
 		string p = Utils::shift(command);
 		if (p=="2"){
@@ -50,16 +124,13 @@ std::string App::processCommand(std::string command){
 		p = Utils::shift(command);
 		int val = std::stoi(p);
 		pw->setPower(val/100.f);
-	} else if (cmd=="status") {
-		return status();
 	} else if (cmd=="off") {
-		pw1.setPower(0);
-		pw2.setPower(0);
+		stop();
 	} else {
 		return "Bad command " + cmd;
 	}
 	lastcmd = save;
-	return "ok";
+	return OK;
 }
 
 void App::usbReceive(uint8_t* buf, uint32_t len){
