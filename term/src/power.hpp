@@ -26,6 +26,8 @@ public:
 		return s;
 	}
 
+	inline int power100() { return int(_power*100);}
+
 	void setPower(float power) {
 		power = std::min(MAX_POWER, std::max(0.f, power));
 		_power = power;

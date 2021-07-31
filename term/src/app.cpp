@@ -81,6 +81,16 @@ void App::startProgram() {
 	jobLed.on();
 }
 
+int App::intVal(string& p) {
+	if (p[0]=='p'){
+		p[1]=='2' ? pw2.power100() : pw1.power100();
+	}
+	if (p[0]=='t'){
+		return p[1]=='2' ? t2.temperature() : t1.temperature();
+	}
+	return std::stoi(p);
+}
+
 std::string App::processCommand(std::string command){
 	std::string save = command;
 	string cmd = Utils::shift(command);
@@ -102,12 +112,7 @@ std::string App::processCommand(std::string command){
 			pid = &top;
 		}
 		p = Utils::shift(command);
-		int val = 0;
-		if (p[0]=='t') {
-			val = p[1]=='2' ? t2.temperature() : t1.temperature();
-		}else{
-			val = std::stoi(p);
-		}
+		int val = intVal(p);
 		p = Utils::shift(command);
 		if (p[1]=='2') {
 			src = &t2;
@@ -118,11 +123,9 @@ std::string App::processCommand(std::string command){
 		string p = Utils::shift(command);
 		if (p=="2"){
 			pw = &pw2;
-		}else if (p!="1"){
-			return "Bad power "+p;
 		}
 		p = Utils::shift(command);
-		int val = std::stoi(p);
+		int val = intVal(p);
 		pw->setPower(val/100.f);
 	} else if (cmd=="off") {
 		stop();
