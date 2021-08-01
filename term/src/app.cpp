@@ -67,7 +67,7 @@ void App::runProgram() {
 	}
 	string cmd = program[0];
 	program.erase(program.begin());
-	cmd = processCommand(cmd);
+	cmd = process(cmd);
 	if (cmd!=OK){
 		lastcmd = cmd;
 	}
@@ -91,18 +91,9 @@ int App::intVal(string& p) {
 	return std::stoi(p);
 }
 
-std::string App::processCommand(std::string command){
+std::string App::process(std::string command){
 	std::string save = command;
 	string cmd = Utils::shift(command);
-	if (cmd=="kill") {
-		stop();
-	} else if (cmd=="status") {
-		return status();
-	}
-	if (inProgram) {
-		program.push_back(save);
-		return OK;
-	}
 	if (cmd == "heat") {
 		startProgram();
 		string p = Utils::shift(command);
@@ -130,10 +121,23 @@ std::string App::processCommand(std::string command){
 	} else if (cmd=="off") {
 		stop();
 	} else {
-		return "Bad command " + cmd;
+		return "Err: " + cmd;
 	}
 	lastcmd = save;
 	return OK;
+}
+
+std::string App::processCommand(std::string command){
+	if (command=="kill") {
+		stop();
+	} else if (command=="status") {
+		return status();
+	}
+	if (inProgram) {
+		program.push_back(command);
+		return OK;
+	}
+	return process(command);
 }
 
 void App::usbReceive(uint8_t* buf, uint32_t len){

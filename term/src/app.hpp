@@ -27,6 +27,7 @@ private:
 	void stop();
 	void startProgram();
 	void runProgram();
+	std::string process(std::string command);
 	int intVal(std::string& p);
 
 private:
