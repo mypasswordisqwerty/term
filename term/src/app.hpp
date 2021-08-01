@@ -13,7 +13,7 @@
 
 class App: public IPidCallback, IButtonCallback {
 public:
-	App():tmr(500){}
+	App():tmr(500),inProgram(false){}
 	Config* config(){return &cfg;}
 	void init();
 	void loop();

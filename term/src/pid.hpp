@@ -1,9 +1,9 @@
 #include "power.hpp"
 #include "max31855.hpp"
 
-#define P 0.2
+#define P 0.05
 #define I 0.05
-#define D 0.02
+#define D 0
 #define PID_PERIOD 1000
 #define DT 1.f
 
@@ -27,6 +27,9 @@ public:
 		this->temp = temp;
 		this->target = target;
 		this->callback = callback;
+		if (temp){
+			goup = target > temp->temperature();
+		}
 	}
 
 	void clearCallback() {
@@ -57,7 +60,8 @@ public:
 		integ = std::min(1.0f, std::max(0.f, integ));
 		out += integ;
 		pwr->setPower(std::min(1.0f, std::max(0.f, out)));
-		if (callback && target>=inp){
+		bool done = goup ? inp>=target : inp<=target;
+		if (callback && done){
 			callback->onPidDone(*this);
 		}
 	}
@@ -70,4 +74,5 @@ private:
 	MAX31855* temp;
 	float integ;
 	IPidCallback* callback;
+	bool goup;
 };

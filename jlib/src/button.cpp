@@ -12,7 +12,7 @@ void Button::loop(uint32_t delay) {
 	if (!valid()){
 		return;
 	}
-	if (state() == _state) {
+	if (state() != _state) {
 		if (_debounce){
 			_debounce = false;
 		}
@@ -22,7 +22,7 @@ void Button::loop(uint32_t delay) {
 		_debounce = true;
 		return;
 	}
-	_state = state();
+	_state = !state();
 	_debounce = false;
 	if (callback) {
 		callback->onButtonToggle(*this, _state);
