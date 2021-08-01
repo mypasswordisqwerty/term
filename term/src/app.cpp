@@ -68,7 +68,7 @@ void App::runProgram() {
 	string cmd = program[0];
 	program.erase(program.begin());
 	cmd = process(cmd);
-	if (cmd!=OK){
+	if (cmd != OK){
 		lastcmd = cmd;
 	}
 }
@@ -81,12 +81,12 @@ void App::startProgram() {
 	jobLed.on();
 }
 
-int App::intVal(string& p) {
-	if (p[0]=='p'){
-		p[1]=='2' ? pw2.power100() : pw1.power100();
+int App::intVal(const string& p) {
+	if (p[0] == 'p'){
+		p[1] == '2' ? pw2.power100() : pw1.power100();
 	}
-	if (p[0]=='t'){
-		return p[1]=='2' ? t2.temperature() : t1.temperature();
+	if (p[0] == 't'){
+		return p[1] == '2' ? t2.temperature() : t1.temperature();
 	}
 	return std::stoi(p);
 }
@@ -99,13 +99,13 @@ std::string App::process(std::string command){
 		string p = Utils::shift(command);
 		Pid* pid = &bottom;
 		MAX31855* src = &t1;
-		if (p=="top") {
+		if (p == "top") {
 			pid = &top;
 		}
 		p = Utils::shift(command);
 		int val = intVal(p);
 		p = Utils::shift(command);
-		if (p[1]=='2') {
+		if (p[1] == '2') {
 			src = &t2;
 		}
 		pid->setTarget(src, val, this);
@@ -118,7 +118,13 @@ std::string App::process(std::string command){
 		p = Utils::shift(command);
 		int val = intVal(p);
 		pw->setPower(val/100.f);
-	} else if (cmd=="off") {
+	} else if (cmd == "pid") {
+		float pk = intVal(Utils::shift(command))/1000.f;
+		float ik = intVal(Utils::shift(command))/1000.f;
+		float dk = intVal(Utils::shift(command))/1000.f;
+		top.setPID(pk, ik, dk);
+		bottom.setPID(pk, ik, dk);
+	} else if (cmd == "off") {
 		stop();
 	} else {
 		return "Err: " + cmd;
@@ -128,9 +134,9 @@ std::string App::process(std::string command){
 }
 
 std::string App::processCommand(std::string command){
-	if (command=="kill") {
+	if (command == "kill") {
 		stop();
-	} else if (command=="status") {
+	} else if (command == "status") {
 		return status();
 	}
 	if (inProgram) {

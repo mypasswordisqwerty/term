@@ -1,9 +1,9 @@
 #include "power.hpp"
 #include "max31855.hpp"
 
-#define P 0.05
-#define I 0.05
-#define D 0
+#define PK 0.05
+#define IK 0.05
+#define DK 0
 #define PID_PERIOD 1000
 #define DT 1.f
 
@@ -15,12 +15,20 @@ struct IPidCallback {
 
 class Pid: public Object {
 public:
-	Pid():period(0), prev(0), pwr(nullptr), target(0), temp(nullptr), integ(0), callback(nullptr) {
+	Pid():pwr(nullptr), period(0), prev(0), integ(0) {
+		clearTarget();
+		setPID(PK, IK, DK);
 	}
 
 	Pid* init(Power& pwr) {
 		this->pwr = &pwr;
 		return this;
+	}
+
+	void setPID(float pk, float ik, float dk){
+		this->pk = pk;
+		this->ik = ik;
+		this->dk = dk;
 	}
 
 	void setTarget(MAX31855* temp, int target, IPidCallback* callback) {
@@ -35,7 +43,6 @@ public:
 	void clearCallback() {
 		this->callback = nullptr;
 	}
-
 
 	void clearTarget() {
 		setTarget(nullptr, 0, nullptr);
@@ -54,9 +61,9 @@ public:
 		prev = inp;
 
 		int err = target - inp;
-		float out = err * P;
-		out += dinp * D / DT;
-		integ += err * I * DT;
+		float out = err * pk;
+		out += dinp * dk / DT;
+		integ += err * ik * DT;
 		integ = std::min(1.0f, std::max(0.f, integ));
 		out += integ;
 		pwr->setPower(std::min(1.0f, std::max(0.f, out)));
@@ -67,9 +74,10 @@ public:
 	}
 
 private:
-	int32_t period;
-	int prev;
 	Power* pwr;
+	int32_t period;
+	float pk, ik, dk;
+	int prev;
 	int target;
 	MAX31855* temp;
 	float integ;

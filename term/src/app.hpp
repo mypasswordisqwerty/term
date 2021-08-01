@@ -28,7 +28,7 @@ private:
 	void startProgram();
 	void runProgram();
 	std::string process(std::string command);
-	int intVal(std::string& p);
+	int intVal(const std::string& p);
 
 private:
 	Config cfg;
