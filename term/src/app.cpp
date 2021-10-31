@@ -17,8 +17,8 @@ void App::init(){
 
 	objects.push_back(pw1.init(cfg.spi, cfg.pw1));
 	objects.push_back(pw2.init(cfg.spi, cfg.pw2));
-	objects.push_back(t1.init(cfg.spi, cfg.csT1));
-	objects.push_back(t2.init(cfg.spi, cfg.csT2));
+	objects.push_back(t1.init(cfg.spi, cfg.csT1, 1));
+	objects.push_back(t2.init(cfg.spi, cfg.csT2, 2));
 	objects.push_back(top.init(pw1));
 	objects.push_back(bottom.init(pw2));
 	objects.push_back(jobButton.init(cfg.btnStart, this));
@@ -138,6 +138,23 @@ std::string App::processCommand(std::string command){
 		stop();
 	} else if (command == "status") {
 		return status();
+	} else if (command.substr(0,4) == "tune") {
+		string p = Utils::shift(command);
+		p = Utils::shift(command);
+		MAX31855* t = &t1;
+		if (p == "t2"){
+			t = &t2;
+		}
+		return t->setTune(command);
+	}
+	else if (command.substr(0,4) == "gettune") {
+		string p = Utils::shift(command);
+		p = Utils::shift(command);
+		MAX31855* t = &t1;
+		if (p == "t2"){
+			t = &t2;
+		}
+		return t->getTune();
 	}
 	if (inProgram) {
 		program.push_back(command);

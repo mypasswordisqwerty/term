@@ -1,11 +1,11 @@
 #include "power.hpp"
 #include "max31855.hpp"
 
-#define PK 0.05
-#define IK 0.05
-#define DK 0
-#define PID_PERIOD 1000
-#define DT 1.f
+#define PK 0.01
+#define IK 0.3
+#define DK 0.3
+#define PID_PERIOD 5000
+#define DT PID_PERIOD/1000.f
 
 class Pid;
 
@@ -57,15 +57,14 @@ public:
 		period = PID_PERIOD;
 
 		int inp = temp->temperature();
-		int dinp = prev - inp;
-		prev = inp;
 
 		int err = target - inp;
 		float out = err * pk;
-		out += dinp * dk / DT;
-		integ += err * ik * DT;
-		integ = std::min(1.0f, std::max(0.f, integ));
-		out += integ;
+		out += (err - prev) * dk / DT;
+		prev = err;
+		integ += err * DT;
+		integ = std::min(0.5f, std::max(-0.5f, integ));
+		out += integ * ik;
 		pwr->setPower(std::min(1.0f, std::max(0.f, out)));
 		bool done = goup ? inp>=target : inp<=target;
 		if (callback && done){

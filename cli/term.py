@@ -58,7 +58,6 @@ class Device(Emu):
                                stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
 
     def _process(self, cmd):
-        Emu.process(cmd)
         self.f.write(cmd.encode())
         return self.readline(self.f)
 
